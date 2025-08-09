@@ -1,0 +1,4455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=download" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=image_arrow_up" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 8px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 25px !important;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 65px;
+        }
+
+        @media screen and (min-width: 768px) {
+            .tab-btn {
+                border-radius: 30px !important;
+                min-width: 80px !important;
+            }
+            
+            .circular-checkbox {
+                position: relative !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                vertical-align: middle !important;
+                left: 0 !important;
+                top: 0 !important;
+                margin-left: 8px !important;
+            }
+            
+            .checkbox-inner {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                color: #22c55e;
+                font-size: 17px;
+            }
+            
+            .toggle-btn.active .checkbox-inner {
+                opacity: 1;
+            }
+        }
+
+        .tab-btn.active {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .form-section {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-section.active {
+            display: flex;
+        }
+
+        .form-field {
+            background: #f5f5f5;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-field:focus {
+            outline: none;
+            background: #f0f0f0;
+        }
+
+        .form-field::placeholder {
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        textarea.form-field {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .location-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .coordinate-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .coordinate-input-group .form-field {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            flex: 1;
+            margin: 0;
+        }
+
+        .help-btn {
+            background: #666;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .help-btn:hover {
+            background: #555;
+        }
+
+        .location-help-modal .modal-content {
+            max-width: 400px;
+        }
+
+        .help-content {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .help-content h4 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-content ol {
+            margin: 16px 0;
+            padding-left: 20px;
+        }
+
+        .help-content li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .help-content .example {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: monospace;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .gps-prompt-modal .modal-content {
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .gps-icon {
+            font-size: 48px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .gps-prompt-content h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .gps-prompt-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .gps-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .gps-enable-btn, .gps-cancel-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .gps-enable-btn {
+            background: #333;
+            color: white;
+        }
+
+        .gps-enable-btn:hover {
+            background: #555;
+        }
+
+        .gps-cancel-btn {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .gps-cancel-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .get-location-btn {
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .get-location-btn:hover {
+            background: #333;
+        }
+
+        .get-location-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .contact-picker-btn {
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+            height: 56px;
+        }
+
+        .contact-picker-btn:hover {
+            background: #333;
+        }
+
+        .contact-picker-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .contact-picker-btn-small {
+            padding: 12px;
+            min-width: 48px;
+            height: 48px;
+            font-size: 14px;
+        }
+
+        .color-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .contrast-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            float: right;
+            color: #22c55e;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .corner-toggle-btn {
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            color: #666;
+        }
+
+        .corner-toggle-btn.active {
+            color: white;
+            border: 2px solid #333;
+        }
+
+        .color-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .color-mode-section {
+            margin-bottom: 8px;
+        }
+
+        .gradient-section {
+            margin-left: 0px;
+        }
+
+        .gradient-direction {
+            margin-top: 12px;
+            margin-bottom: 0;
+        }
+
+        .gradient-direction label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .color-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .color-input-container {
+            flex: 1;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 48px;
+            height: 48px;
+        }
+
+        .color-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-input {
+            background: none;
+            border: none;
+            color: #333;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            outline: none;
+            width: 70px;
+            text-align: right;
+        }
+
+        .color-input:focus {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .color-input.invalid {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .color-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .color-toggles {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .toggle-btn {
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-width: 100px;
+        }
+
+        .toggle-btn.active {
+            background: #333;
+            color: white;
+            border: none;
+        }
+
+        .circular-checkbox {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #e0e0e0;
+            background: white;
+            position: relative !important;
+            transition: all 0.3s ease;
+            margin-left: 8px;
+            flex-shrink: 0;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-inner {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: #22c55e;
+            font-size: 17px;
+        }
+
+        .toggle-btn.active .checkbox-inner {
+            opacity: 1;
+        }
+
+        @media screen and (min-width: 1024px) {
+            .circular-checkbox {
+                position: relative !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                vertical-align: middle;
+            }
+            
+            .checkbox-inner {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                color: #22c55e;
+                font-size: 17px;
+            }
+            
+            .toggle-btn.active .checkbox-inner {
+                opacity: 1;
+            }
+        }
+
+        .bg-container.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        .bg-preview.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        .action-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .format-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .format-select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .get-qr-btn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .get-qr-btn:hover {
+            background: #555;
+            transform: translateY(-1px);
+        }
+
+        .preview-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .content-type-badge {
+            background: #000;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #f5f5f5;
+            border: none;
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .action-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .qr-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            background: #fafafa;
+            border-radius: 16px;
+            position: relative;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .qr-placeholder {
+            text-align: center;
+            color: #999;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .qr-placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        #qr-code {
+            width: 320px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            margin: 0 auto;
+        }
+
+        #qr-code canvas {
+            width: 300px !important;
+            height: 300px !important;
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .controls-section {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .slider-container {
+            margin-bottom: 20px;
+        }
+
+        .slider-container label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+        }
+
+        .pattern-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            background: #f5f5f5;
+            border-radius: 25px;
+            padding: 10px 15px;
+            justify-content: space-between;
+        }
+
+        .pattern-buttons::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pattern-btn {
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .pattern-btn:hover {
+            background: #e0e0e0;
+            border-color: #cbd5e1;
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .encryption-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .encryption-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .encryption-toggle {
+            margin-bottom: 16px;
+        }
+
+        .encryption-controls {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .encryption-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .encryption-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .encryption-strength {
+            margin: 16px 0;
+        }
+
+        .encryption-strength label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .encryption-status {
+            margin-top: 12px;
+        }
+
+        .status-indicator {
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .status-indicator.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-indicator.warning {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 320px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .option-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .option-item:hover {
+            background: #f5f5f5;
+        }
+
+        .option-item.active {
+            background: #333;
+            color: white;
+        }
+
+        .option-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .option-name {
+            font-weight: 500;
+        }
+
+        .logo-upload {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logo-upload:hover {
+            border-color: #333;
+        }
+
+        .logo-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .logo-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            gap: 12px;
+        }
+
+        .remove-logo-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .remove-logo-btn:hover {
+            background: #cc0000;
+        }
+
+        .remove-logo-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .color-picker-modal-content {
+            max-width: 440px;
+            padding: 0;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .color-picker-container {
+            width: 100%;
+            max-width: 400px;
+            height: 420px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border-radius: 16px;
+        }
+
+        .color-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            height: 35px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .color-picker-container .title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .color-picker-container .close-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .color-picker-container .close-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .color-area-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        #colorCanvas {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            cursor: crosshair;
+            display: block;
+        }
+
+        #colorArHandle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            left: 50%;
+            top: 50%;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            margin: 15px 0;
+            flex-shrink: 0;
+        }
+
+        #hueSlider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+            outline: none;
+            cursor: pointer;
+        }
+
+        #hueSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+
+        #hueSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+
+        .format-select-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .format-select-wrapper select {
+            flex: 1;
+            max-width: 50%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f2f2f2;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .preview-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            justify-content: center;
+        }
+
+        .color-picker-container .color-preview {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+            background: rgb(255, 0, 0);
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .copy-button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: #f2f2f2;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+
+        .copy-button:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .copy-button:active {
+            transform: scale(0.95);
+        }
+
+        .copy-message {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copy-message.show {
+            opacity: 1;
+        }
+
+        .input-card-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex: 1;
+            align-items: flex-start;
+        }
+
+        .input-card {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .input-card label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .input-card input {
+            width: 100%;
+            max-width: 60px;
+            padding: 5px;
+            font-size: 14px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .input-card input:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            height: 14px;
+            margin-top: 2px;
+        }
+
+        .bulk-upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .bulk-upload-area:hover {
+            border-color: #333;
+            background: #f5f5f5;
+        }
+
+        .bulk-upload-area.dragover {
+            border-color: #333;
+            background: #f0f0f0;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .upload-text h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .upload-text p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .upload-text small {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .bulk-loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .sample-format {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e5e7eb;
+        }
+
+        .sample-format h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .sample-format pre {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: #666;
+            overflow-x: auto;
+            margin-bottom: 12px;
+        }
+
+        .download-sample-btn {
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .download-sample-btn:hover {
+            background: #555;
+        }
+
+        .bulk-preview {
+            margin: 20px 0;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .preview-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .clear-data-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-data-btn:hover {
+            background: #cc0000;
+        }
+
+        .preview-table-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        #bulk-preview-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #bulk-preview-table th {
+            background: #f5f5f5;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        #bulk-preview-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        #bulk-preview-table tr.invalid {
+            background: #fef2f2;
+        }
+
+        .edit-cell {
+            background: transparent;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        .edit-cell:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .delete-row-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-row-btn:hover {
+            background: #cc0000;
+        }
+
+        .bulk-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .bulk-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .bulk-stats span {
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+
+        .generate-bulk-btn {
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .generate-bulk-btn:hover:not(:disabled) {
+            background: #555;
+        }
+
+        .generate-bulk-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .bulk-progress {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .bulk-progress h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #333;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .progress-status {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .bulk-results {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .bulk-results h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .results-summary {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .download-options {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .download-zip-btn, .start-new-bulk {
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .download-zip-btn:hover, .start-new-bulk:hover {
+            background: #555;
+        }
+
+        .start-new-bulk {
+            background: #666;
+        }
+
+        .start-new-bulk:hover {
+            background: #777;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .tab-btn {
+                font-size: 11px;
+                padding: 6px 12px;
+                min-width: 55px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .preview-actions {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .action-btn {
+                padding: 8px;
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            .pattern-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 8px 10px;
+            }
+            
+            .pattern-btn {
+                font-size: 18px;
+                min-width: unset;
+                padding: 6px 8px;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                max-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Pick a content type</h2>
+            
+            <div class="tab-nav">
+                <button class="tab-btn active" data-type="text">Text</button>
+                <button class="tab-btn" data-type="url">URL</button>
+                <button class="tab-btn" data-type="contact">Contact</button>
+                <button class="tab-btn" data-type="phone">Phone</button>
+                <button class="tab-btn" data-type="email">Email</button>
+                <button class="tab-btn" data-type="event">Event</button>
+                <button class="tab-btn" data-type="geo">Geo</button>
+                <button class="tab-btn" data-type="wifi">Wi-Fi</button>
+                <button class="tab-btn" data-type="myqr">My QR</button>
+                <button class="tab-btn" data-type="bulk">Bulk QR</button>
+            </div>
+
+            <div class="form-section active" id="text-form">
+                <textarea class="form-field" id="text-input" placeholder="ENTER YOUR TEXT"></textarea>
+            </div>
+
+            <div class="form-section" id="url-form">
+                <input type="url" class="form-field" id="url-input" placeholder="WEBSITE URL">
+            </div>
+
+            <div class="form-section" id="contact-form">
+                <input type="text" class="form-field" id="contact-name" placeholder="FULL NAME">
+                <div class="form-row">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="tel" class="form-field" id="contact-phone" placeholder="PHONE" style="flex: 1;">
+                        <button type="button" class="contact-picker-btn contact-picker-btn-small" id="contact-picker-btn-2" title="Select from Contacts">
+                            <i class="fa-solid fa-address-book"></i>
+                        </button>
+                    </div>
+                    <input type="email" class="form-field" id="contact-email" placeholder="EMAIL">
+                </div>
+                <input type="text" class="form-field" id="contact-organization" placeholder="ORGANIZATION">
+            </div>
+
+            <div class="form-section" id="phone-form">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="tel" class="form-field" id="phone-number" placeholder="PHONE NUMBER" style="flex: 1;">
+                    <button type="button" class="contact-picker-btn" id="contact-picker-btn" title="Select from Contacts">
+                        <i class="fa-solid fa-address-book"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-section" id="email-form">
+                <input type="email" class="form-field" id="email-to" placeholder="EMAIL">
+                <input type="text" class="form-field" id="email-subject" placeholder="SUBJECT">
+                <textarea class="form-field" id="email-message" placeholder="MESSAGE"></textarea>
+            </div>
+
+            <div class="form-section" id="event-form">
+                <input type="text" class="form-field" id="event-title" placeholder="EVENT TITLE">
+                <div class="form-row">
+                    <input type="date" class="form-field" id="event-date">
+                    <input type="time" class="form-field" id="event-time">
+                </div>
+                <input type="text" class="form-field" id="event-location" placeholder="LOCATION">
+            </div>
+
+            <div class="form-section" id="geo-form">
+                <div class="location-controls">
+                    <button type="button" class="get-location-btn" id="get-current-location">
+                        <i class="fas fa-location-arrow"></i>
+                        <span class="btn-text">Get Current Location</span>
+                    </button>
+                </div>
+                <div class="form-row">
+                    <div class="coordinate-input-group">
+                        <input type="number" class="form-field" id="geo-lat" placeholder="LATITUDE" step="any">
+                        <button type="button" class="help-btn" id="lat-help" title="कैसे पता करें?">
+                            <i class="fas fa-question"></i>
+                        </button>
+                    </div>
+                    <div class="coordinate-input-group">
+                        <input type="number" class="form-field" id="geo-lng" placeholder="LONGITUDE" step="any">
+                        <button type="button" class="help-btn" id="lng-help" title="कैसे पता करें?">
+                            <i class="fas fa-question"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" id="wifi-form">
+                <input type="text" class="form-field" id="wifi-ssid" placeholder="NETWORK NAME">
+                <input type="password" class="form-field" id="wifi-password" placeholder="PASSWORD">
+                <select class="form-field" id="wifi-security">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">OPEN</option>
+                </select>
+            </div>
+
+            <div class="form-section" id="myqr-form">
+                <textarea class="form-field" id="myqr-input" placeholder="CUSTOM QR DATA"></textarea>
+            </div>
+
+            <div class="form-section" id="bulk-form">
+                <div class="bulk-upload-area" id="bulk-upload-area">
+                    <div class="upload-icon"><i class="fas fa-folder-open"></i></div>
+                    <div class="upload-text">
+                        <h3>Upload CSV or Excel File</h3>
+                        <p>Drag & drop your file here or click to browse</p>
+                        <small>Supported formats: .csv, .xlsx, .xls</small>
+                    </div>
+                    <input type="file" id="bulk-file-input" accept=".csv,.xlsx,.xls" style="display: none;">
+                </div>
+
+                <div class="bulk-loading" id="bulk-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Processing your file...</p>
+                </div>
+                
+                <div class="sample-format" id="sample-format" style="display: none;">
+                    <h4><i class="fas fa-list"></i> Sample CSV Format:</h4>
+                    <pre>Name,Content,Type
+Website,https://example.com,url
+Contact,John Doe|+1234567890|john@email.com,contact
+Phone,+1234567890,phone
+Text,Hello World,text</pre>
+                    <button class="download-sample-btn" id="download-sample"><i class="fas fa-download"></i> Download Sample CSV</button>
+                </div>
+
+                <div class="bulk-preview" id="bulk-preview" style="display: none;">
+                    <div class="preview-header">
+                        <h4>Data Preview (<span id="preview-count">0</span> items)</h4>
+                        <button class="clear-data-btn" id="clear-bulk-data">Clear Data</button>
+                    </div>
+                    <div class="preview-table-container">
+                        <table id="bulk-preview-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">QR Name</th>
+                                    <th style="width: 40%;">Content Data</th>
+                                    <th style="width: 20%;">Content Type</th>
+                                    <th style="width: 15%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bulk-preview-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bulk-actions">
+                        <div class="bulk-stats">
+                            <span>Valid: <span id="valid-count">0</span></span>
+                            <span>Invalid: <span id="invalid-count">0</span></span>
+                        </div>
+                        <button class="generate-bulk-btn" id="generate-bulk" disabled>
+                            Generate <span id="bulk-count">0</span> QR Codes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bulk-progress" id="bulk-progress" style="display: none;">
+                    <h4>Generating QR Codes...</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="progress-current">0</span> / <span id="progress-total">0</span> completed
+                    </div>
+                    <div class="progress-status" id="progress-status">Preparing...</div>
+                </div>
+
+                <div class="bulk-results" id="bulk-results" style="display: none;">
+                    <h4>Generation Complete!</h4>
+                    <div class="results-summary">
+                        <span><i class="fas fa-check-circle" style="color: #22c55e;"></i> Successfully generated: <span id="success-count">0</span></span>
+                        <span><i class="fas fa-times-circle" style="color: #dc2626;"></i> Failed: <span id="error-count">0</span></span>
+                    </div>
+                    <div class="download-options">
+                        <button class="download-zip-btn" id="download-zip">
+                            <i class="fas fa-archive"></i> Download ZIP File
+                        </button>
+                        <button class="start-new-bulk" id="start-new-bulk">
+                            <i class="fas fa-redo"></i> Generate New Batch
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-section">
+                <h3>Choose your colors
+                    <span class="contrast-indicator">
+                        <i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>
+                        Contrast
+                    </span>
+                </h3>
+                
+                <div class="color-controls">
+                    <div class="color-mode-section">
+                        <div class="color-toggles">
+                            <button class="toggle-btn active" id="fg-solid">Solid</button>
+                            <button class="toggle-btn" id="fg-gradient">Gradient</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-group">
+                        <div class="color-input-container" id="fg-container">
+                            <span class="color-label">FOREGROUND HEX</span>
+                            <input type="text" class="color-input" id="fg-input" value="#000000" maxlength="7">
+                        </div>
+                        <div class="color-preview" id="fg-preview" style="background: #000000;"></div>
+                    </div>
+                    
+                    <div class="gradient-section" id="gradient-section" style="display: none;">
+                        <div class="color-group">
+                            <div class="color-input-container" id="fg2-container">
+                                <span class="color-label">FOREGROUND END HEX</span>
+                                <input type="text" class="color-input" id="fg2-input" value="#ff0000" maxlength="7">
+                            </div>
+                            <div class="color-preview" id="fg2-preview" style="background: #ff0000;"></div>
+                        </div>
+                        
+                        <div class="slider-container gradient-direction">
+                            <label for="gradient-direction-slider">Gradient Direction: <span id="gradient-direction-value">45°</span></label>
+                            <input type="range" id="gradient-direction-slider" min="0" max="360" value="45">
+                        </div>
+                    </div>
+                    
+                    <div class="color-group">
+                        <div class="color-input-container bg-container" id="bg-container">
+                            <span class="color-label">BACKGROUND HEX</span>
+                            <input type="text" class="color-input" id="bg-input" value="#FFFFFF" maxlength="7">
+                        </div>
+                        <div class="color-preview bg-preview" id="bg-preview" style="background: #FFFFFF;"></div>
+                    </div>
+                    <div class="color-toggles">
+                        <button class="toggle-btn" id="bg-transparent">
+                            <span>Transparent</span>
+                            <div class="circular-checkbox" id="transparent-checkbox">
+                                <i class="fa-solid fa-circle-dot checkbox-inner"></i>
+                            </div>
+                        </button>
+                        <button class="corner-toggle-btn" id="corner-color-toggle">
+                            <span>Custom Corner Color</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="encryption-section">
+                <h3><i class="fas fa-lock"></i> Password Protection</h3>
+                
+                <div class="encryption-toggle">
+                    <button class="toggle-btn" id="encryption-toggle">
+                        <span>Encrypt QR Code</span>
+                        <div class="circular-checkbox" id="encryption-checkbox">
+                            <i class="fa-solid fa-circle-dot checkbox-inner"></i>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="encryption-controls" id="encryption-controls" style="display: none;">
+                    <div class="encryption-info">
+                        <p><i class="fas fa-shield-alt"></i> Your data will be encrypted before generating the QR code. Only someone with the password can read it.</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                            <i class="fas fa-mobile-alt"></i> When scanned, encrypted QR shows: <code>ENCRYPTED:METHOD:data...</code><br>
+                            <i class="fas fa-unlock"></i> Use QR decryption tools or apps that support password-protected QR codes.
+                        </p>
+                    </div>
+                    
+                    <div class="form-row">
+                        <input type="password" class="form-field" id="encrypt-password" placeholder="ENTER PASSWORD">
+                        <input type="password" class="form-field" id="encrypt-confirm" placeholder="CONFIRM PASSWORD">
+                    </div>
+                    
+                    <div class="encryption-strength">
+                        <label for="encryption-method">Encryption Strength:</label>
+                        <select class="form-field" id="encryption-method">
+                            <option value="AES">AES-256 (Recommended)</option>
+                            <option value="TripleDES">Triple DES</option>
+                        </select>
+                    </div>
+                    
+                    <div class="encryption-status" id="encryption-status">
+                        <span class="status-indicator" id="password-status">Passwords don't match</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <div class="format-group">
+                    <select class="format-select" id="format-select">
+                        <option value="png">PNG</option>
+                        <option value="svg">SVG</option>
+                        <option value="jpg">JPG</option>
+                    </select>
+                </div>
+                <button class="get-qr-btn" id="generate-qr">
+                    <i class="fa-solid fa-download"></i>
+                    Get QR Code
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="preview-actions">
+                <div class="content-type-badge" id="content-type-badge">TEXT</div>
+                <div class="action-buttons">
+                    <button class="action-btn" id="share-btn" title="Share">
+                        <i class="fas fa-share-alt"></i> 
+                    </button>
+                    <button class="action-btn" id="print-btn" title="Print">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="qr-preview">
+                <div class="qr-placeholder" id="qr-placeholder">
+                    <div class="qr-placeholder-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div>Generate QR First</div>
+                    <div style="font-size: 12px; margin-top: 8px; color: #ccc;">Enter content to generate QR code</div>
+                </div>
+                <div id="qr-code" style="display: none;"></div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="slider-container">
+                    <label for="padding-slider">Padding: <span id="padding-value">20px</span></label>
+                    <input type="range" id="padding-slider" min="0" max="50" value="20">
+                </div>
+
+                <div class="pattern-buttons">
+                    <button class="pattern-btn" id="qr-pattern" title="QR Pattern">
+                        <span class="material-icons">lens_blur</span>
+                    </button>
+                    <button class="pattern-btn" id="corner-pattern" title="Corner Pattern">
+                        <i class="fas fa-border-style"></i>
+                    </button>
+                    <button class="pattern-btn" id="corner-dot" title="Corner Dot">
+                        <i class="fas fa-dot-circle"></i>
+                    </button>
+                    <button class="pattern-btn" id="quality-btn" title="Quality">
+                        <span class="material-icons">hd</span>
+                    </button>
+                    <button class="pattern-btn" id="logo-btn" title="Logo">
+                        <span class="material-symbols-outlined">image_arrow_up</span>        
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Modal -->
+    <div class="overlay" id="qr-pattern-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>QR Pattern</h3>
+                <button class="close-btn" data-close="qr-pattern-modal">×</button>
+            </div>
+            <div class="option-grid">
+                <div class="option-item active" data-pattern="square">
+                    <div class="option-icon"><i class="fas fa-square"></i></div>
+                    <div class="option-name">Square</div>
+                </div>
+                <div class="option-item" data-pattern="rounded">
+                    <div class="option-icon"><i class="fas fa-circle"></i></div>
+                    <div class="option-name">Rounded</div>
+                </div>
+                <div class="option-item" data-pattern="extra-rounded">
+                    <div class="option-icon"><i class="fas fa-square-full"></i></div>
+                    <div class="option-name">Squircle</div>
+                </div>
+                <div class="option-item" data-pattern="dots">
+                    <div class="option-icon"><i class="fas fa-dot-circle"></i></div>
+                    <div class="option-name">Circle</div>
+                </div>
+                <div class="option-item" data-pattern="classy">
+                    <div class="option-icon"><i class="fas fa-gem"></i></div>
+                    <div class="option-name">Cornerflow</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="corner-pattern-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Corner Pattern</h3>
+                <button class="close-btn" data-close="corner-pattern-modal">×</button>
+            </div>
+            <div class="option-grid">
+                <div class="option-item active" data-corner="square">
+                    <div class="option-icon"><i class="fas fa-square"></i></div>
+                    <div class="option-name">Square</div>
+                </div>
+                <div class="option-item" data-corner="extra-rounded">
+                    <div class="option-icon"><i class="fas fa-circle"></i></div>
+                    <div class="option-name">Extra Rounded</div>
+                </div>
+                <div class="option-item" data-corner="circle">
+                    <div class="option-icon"><i class="fas fa-dot-circle"></i></div>
+                    <div class="option-name">Circle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="corner-dot-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Corner Dot Pattern</h3>
+                <button class="close-btn" data-close="corner-dot-modal">×</button>
+            </div>
+            <div class="option-grid">
+                <div class="option-item active" data-corner-dot="square">
+                    <div class="option-icon"><i class="fas fa-square"></i></div>
+                    <div class="option-name">Square</div>
+                </div>
+                <div class="option-item" data-corner-dot="circle">
+                    <div class="option-icon"><i class="fas fa-dot-circle"></i></div>
+                    <div class="option-name">Circle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="quality-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Quality</h3>
+                <button class="close-btn" data-close="quality-modal">×</button>
+            </div>
+            <div class="option-grid">
+                <div class="option-item" data-quality="draft">
+                    <div class="option-icon"><i class="fas fa-file"></i></div>
+                    <div class="option-name">Draft (300px)</div>
+                </div>
+                <div class="option-item" data-quality="low">
+                    <div class="option-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="option-name">Low (500px)</div>
+                </div>
+                <div class="option-item active" data-quality="medium">
+                    <div class="option-icon"><i class="fas fa-laptop"></i></div>
+                    <div class="option-name">Medium (700px)</div>
+                </div>
+                <div class="option-item" data-quality="high">
+                    <div class="option-icon"><i class="fas fa-desktop"></i></div>
+                    <div class="option-name">High (900px)</div>
+                </div>
+                <div class="option-item" data-quality="ultra">
+                    <div class="option-icon"><i class="fas fa-tv"></i></div>
+                    <div class="option-name">Ultra (1200px)</div>
+                </div>
+                <div class="option-item" data-quality="max">
+                    <div class="option-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="option-name">Max (1600px)</div>
+                </div>
+                <div class="option-item" data-quality="print">
+                    <div class="option-icon"><i class="fas fa-print"></i></div>
+                    <div class="option-name">Print (2400px)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="logo-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Logo</h3>
+                <button class="close-btn" data-close="logo-modal">×</button>
+            </div>
+            <div class="logo-upload" id="logo-upload">
+                <div><i class="fas fa-folder-open"></i> Upload Logo</div>
+                <input type="file" id="logo-input" accept="image/*" style="display: none;">
+                <img id="logo-preview" class="logo-preview" style="display: none;">
+            </div>
+            <div class="logo-controls">
+                <button class="remove-logo-btn" id="remove-logo-btn" disabled>Remove Logo</button>
+            </div>
+            <div class="slider-container">
+                <label for="logo-size-slider">Logo Size: <span id="logo-size-value">0.3</span></label>
+                <input type="range" id="logo-size-slider" min="0.1" max="0.5" step="0.1" value="0.3">
+            </div>
+            <div class="slider-container">
+                <label for="logo-padding-slider">Logo Padding: <span id="logo-padding-value">10px</span></label>
+                <input type="range" id="logo-padding-slider" min="0" max="20" value="10">
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="color-picker-modal">
+        <div class="modal-content color-picker-modal-content">
+            <div class="color-picker-container" id="colorPicker">
+                <div class="color-picker-header">
+                    <div class="header-left">
+                        <span class="title">Edit Color</span>
+                        <div class="color-preview" id="colorPreview"></div>
+                    </div>
+                    <button class="close-btn" id="closeColorPicker">✕</button>
+                </div>
+
+                <div class="color-area-wrapper">
+                    <canvas id="colorCanvas" width="300" height="120"></canvas>
+                    <div id="colorArHandle"></div>
+                </div>
+
+                <div class="slider-wrapper">
+                    <input type="range" id="hueSlider" min="0" max="360" value="0">
+                </div>
+
+                <div class="format-select-wrapper">
+                    <select id="colorFormat">
+                        <option value="rgb">RGB</option>
+                        <option value="hsl">HSL</option>
+                        <option value="hsv">HSV</option>
+                    </select>
+                    <button class="copy-button" id="copyBtn" title="Copy color value">
+                        <i class="fas fa-copy"></i>
+                        <div class="copy-message" id="copyMessage">Copied!</div>
+                    </button>
+                </div>
+
+                <div class="preview-section">
+                    <div class="input-card-wrapper">
+                        <div class="input-card">
+                            <label id="label1">R</label>
+                            <input type="number" id="input1" min="0" max="255" value="255">
+                            <div class="error-msg" id="error1"></div>
+                        </div>
+                        <div class="input-card">
+                            <label id="label2">G</label>
+                            <input type="number" id="input2" min="0" max="255" value="0">
+                            <div class="error-msg" id="error2"></div>
+                        </div>
+                        <div class="input-card">
+                            <label id="label3">B</label>
+                            <input type="number" id="input3" min="0" max="255" value="0">
+                            <div class="error-msg" id="error3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Help Modal -->
+    <div class="overlay location-help-modal" id="location-help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Location कैसे पता करें?</h3>
+                <button class="close-btn" data-close="location-help-modal">×</button>
+            </div>
+            <div class="help-content">
+                <h4><i class="fas fa-map-marker-alt"></i> किसी स्थान के Latitude और Longitude कैसे पता करें:</h4>
+                <ol>
+                    <li><strong>Google Maps</strong> खोलें</li>
+                    <li>उस जगह पर <strong>लॉन्ग प्रेस</strong> करें जहाँ का location चाहिए</li>
+                    <li>सर्च बार में ऊपर आपको <strong>Latitude, Longitude</strong> दिखाई देगा</li>
+                    <li>इन निर्देशांकों को आप <strong>कॉपी</strong> कर सकते हैं</li>
+                </ol>
+                <div class="example">
+                    उदाहरण: 27.1751, 78.0421<br>
+                    (पहला नंबर = Latitude, दूसरा = Longitude)
+                </div>
+                <p style="font-size: 12px; color: #888; margin-top: 16px;">
+                    <i class="fas fa-info-circle"></i> 
+                    या फिर "Get Current Location" बटन दबाकर अपनी वर्तमान स्थिति का location पा सकते हैं
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPS Prompt Modal -->
+    <div class="overlay gps-prompt-modal" id="gps-prompt-modal">
+        <div class="modal-content">
+            <div class="gps-prompt-content">
+                <div class="gps-icon">
+                    <i class="fas fa-location-arrow"></i>
+                </div>
+                <h3>Location Access चाहिए</h3>
+                <p>अपनी वर्तमान स्थिति पाने के लिए कृपया अपने डिवाइस की <strong>Location/GPS</strong> को <strong>ON</strong> करें और इस website को location access की अनुमति दें।</p>
+                <div class="gps-actions">
+                    <button class="gps-enable-btn" id="enable-location">
+                        <i class="fas fa-location-arrow"></i> Location Enable करें
+                    </button>
+                    <button class="gps-cancel-btn" id="cancel-location">रद्द करें</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let qrCodeStyling = null;
+        let libraryLoaded = false;
+        let currentType = 'text';
+        let currentPattern = 'square';
+        let currentCornerPattern = 'square';
+        let currentCornerDotPattern = 'square';
+        let currentQuality = 'medium';
+        let currentPadding = 20;
+        let fgColor = '#000000';
+        let fg2Color = '#ff0000';
+        let bgColor = '#ffffff';
+        let logoImage = null;
+        let logoSize = 0.3;
+        let logoPadding = 10;
+        let isGradient = false;
+        let gradientAngle = 45;
+        let qrDisplaySize = 300;
+        let hasGeneratedQR = false;
+        
+        let cornerColorEnabled = false;
+        let cornerColor = '#ff0000';
+        let cornerColor2 = '#0000ff';
+        let cornerColorStep = 'start';
+        
+        let encryptionEnabled = false;
+        let encryptPassword = '';
+        let encryptConfirm = '';
+        let encryptionMethod = 'AES';
+        let cryptoJSLoaded = false;
+
+        let bulkData = [];
+        let bulkGenerationInProgress = false;
+        let generatedQRs = [];
+        let jsZipLoaded = false;
+
+        const contentTypeNames = {
+            text: 'TEXT',
+            url: 'URL',
+            contact: 'CONTACT',
+            phone: 'PHONE',
+            email: 'EMAIL',
+            event: 'EVENT',
+            geo: 'GEO',
+            wifi: 'WI-FI',
+            myqr: 'MY QR',
+            bulk: 'BULK QR'
+        };
+
+        const qualitySettings = {
+            draft: { size: 300, errorLevel: 'L', typeNumber: 0 },
+            low: { size: 500, errorLevel: 'L', typeNumber: 0 },
+            medium: { size: 700, errorLevel: 'M', typeNumber: 0 },
+            high: { size: 900, errorLevel: 'M', typeNumber: 0 },
+            ultra: { size: 1200, errorLevel: 'H', typeNumber: 0 },
+            max: { size: 1600, errorLevel: 'H', typeNumber: 0 },
+            print: { size: 2400, errorLevel: 'H', typeNumber: 0 }
+        };
+
+        function hasUserInput() {
+            switch(currentType) {
+                case 'text':
+                    return document.getElementById('text-input').value.trim().length > 0;
+                case 'url':
+                    return document.getElementById('url-input').value.trim().length > 0;
+                case 'contact':
+                    return document.getElementById('contact-name').value.trim().length > 0;
+                case 'phone':
+                    return document.getElementById('phone-number').value.trim().length > 0;
+                case 'email':
+                    return document.getElementById('email-to').value.trim().length > 0;
+                case 'event':
+                    return document.getElementById('event-title').value.trim().length > 0;
+                case 'geo':
+                    return document.getElementById('geo-lat').value.trim().length > 0 ||
+                           document.getElementById('geo-lng').value.trim().length > 0;
+                case 'wifi':
+                    return document.getElementById('wifi-ssid').value.trim().length > 0;
+                case 'myqr':
+                    return document.getElementById('myqr-input').value.trim().length > 0;
+                case 'bulk':
+                    return bulkData.length > 0;
+                default:
+                    return false;
+            }
+        }
+
+        async function updateQRVisibility() {
+            const qrCodeElement = document.getElementById('qr-code');
+            const qrPlaceholder = document.getElementById('qr-placeholder');
+            
+            if (hasUserInput()) {
+                qrCodeElement.style.display = 'flex';
+                qrPlaceholder.style.display = 'none';
+                if (currentType !== 'bulk') {
+                    await generateQRCode();
+                }
+                hasGeneratedQR = true;
+            } else {
+                qrCodeElement.style.display = 'none';
+                qrPlaceholder.style.display = 'block';
+                hasGeneratedQR = false;
+            }
+        }
+
+        function updateContentTypeBadge() {
+            const badge = document.getElementById('content-type-badge');
+            badge.textContent = contentTypeNames[currentType] || currentType.toUpperCase();
+        }
+
+        function loadQRLibrary() {
+            if (libraryLoaded) return Promise.resolve();
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js';
+                script.onload = () => {
+                    libraryLoaded = true;
+                    resolve();
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        function isValidHex(hex) {
+            return /^#[0-9A-F]{6}$/i.test(hex);
+        }
+
+        function loadCryptoJS() {
+            if (cryptoJSLoaded) return Promise.resolve();
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+                script.onload = () => {
+                    cryptoJSLoaded = true;
+                    resolve();
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function encryptDataIfNeeded(data) {
+            if (!encryptionEnabled || !encryptPassword) {
+                return data;
+            }
+
+            if (!cryptoJSLoaded) {
+                await loadCryptoJS();
+            }
+
+            try {
+                let encrypted;
+                if (encryptionMethod === 'AES') {
+                    encrypted = CryptoJS.AES.encrypt(data, encryptPassword).toString();
+                } else if (encryptionMethod === 'TripleDES') {
+                    encrypted = CryptoJS.TripleDES.encrypt(data, encryptPassword).toString();
+                }
+                
+                const userFriendlyMessage = `<i class="fa-solid fa-lock"></i> ENCRYPTED QR CODE <i class="fa-solid fa-lock"></i>
+
+This QR contains password-protected data.
+
+<i class="fa-solid fa-key"></i> Method: ${encryptionMethod}-256
+<i class="fa-solid fa-mobile"></i> To decrypt: Use QR decryption tools or apps that support encrypted QR codes
+
+<i class="fa-solid fa-triangle-exclamation"></i> You will need the password to view the actual content.
+
+Original Data Type: ${currentType.toUpperCase()}
+Created: ${new Date().toLocaleDateString()}
+
+---
+Technical Data: ${encrypted}`;
+                
+                return userFriendlyMessage;
+            } catch (error) {
+                console.error('Encryption error:', error);
+                showToast('Encryption failed. Generating unencrypted QR.');
+                return data;
+            }
+        }
+
+        function validatePasswords() {
+            const password = document.getElementById('encrypt-password').value;
+            const confirm = document.getElementById('encrypt-confirm').value;
+            const statusElement = document.getElementById('password-status');
+
+            if (!password && !confirm) {
+                statusElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Enter password to encrypt';
+                statusElement.className = 'status-indicator warning';
+                return false;
+            }
+
+            if (password.length < 4) {
+                statusElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Password too short (min 4 characters)';
+                statusElement.className = 'status-indicator warning';
+                return false;
+            }
+
+            if (password !== confirm) {
+                statusElement.innerHTML = '<i class="fa-solid fa-times"></i> Passwords don\'t match';
+                statusElement.className = 'status-indicator error';
+                return false;
+            }
+
+            statusElement.innerHTML = '<i class="fa-solid fa-lock"></i> Password confirmed - QR will be encrypted';
+            statusElement.className = 'status-indicator success';
+            return true;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function createGradientConfig() {
+            const radians = (gradientAngle * Math.PI) / 180;
+            return {
+                type: 'linear',
+                rotation: radians,
+                colorStops: [
+                    { offset: 0, color: fgColor },
+                    { offset: 1, color: fg2Color }
+                ]
+            };
+        }
+
+        function getColorConfig() {
+            if (isGradient && isValidHex(fgColor) && isValidHex(fg2Color)) {
+                return createGradientConfig();
+            }
+            return fgColor;
+        }
+
+        function createCornerGradientConfig() {
+            const radians = (gradientAngle * Math.PI) / 180;
+            return {
+                type: 'linear',
+                rotation: radians,
+                colorStops: [
+                    { offset: 0, color: cornerColor },
+                    { offset: 1, color: cornerColor2 }
+                ]
+            };
+        }
+
+        function getCornerColorConfig() {
+            if (cornerColorEnabled) {
+                return createCornerGradientConfig();
+            }
+            return getColorConfig();
+        }
+
+        async function getQRData() {
+            let data = '';
+            
+            switch(currentType) {
+                case 'text':
+                    data = document.getElementById('text-input').value.trim() || 'Hello World!';
+                    break;
+                case 'url':
+                    let url = document.getElementById('url-input').value.trim() || 'https://example.com';
+                    if (!url.match(/^https?:\/\//)) {
+                        url = 'https://' + url;
+                    }
+                    data = url;
+                    break;
+                case 'contact':
+                    const name = document.getElementById('contact-name').value.trim() || 'John Doe';
+                    const phone = document.getElementById('contact-phone').value.trim() || '';
+                    const email = document.getElementById('contact-email').value.trim() || '';
+                    const org = document.getElementById('contact-organization').value.trim() || '';
+                    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}${phone ? '\nTEL:' + phone : ''}${email ? '\nEMAIL:' + email : ''}${org ? '\nORG:' + org : ''}\nEND:VCARD`;
+                    break;
+                case 'phone':
+                    const phoneNum = document.getElementById('phone-number').value.trim() || '+1234567890';
+                    data = `tel:${phoneNum}`;
+                    break;
+                case 'email':
+                    const to = document.getElementById('email-to').value.trim() || 'example@email.com';
+                    const subject = document.getElementById('email-subject').value.trim();
+                    const message = document.getElementById('email-message').value.trim();
+                    let emailUrl = `mailto:${to}`;
+                    const params = [];
+                    if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+                    if (message) params.push(`body=${encodeURIComponent(message)}`);
+                    if (params.length > 0) {
+                        emailUrl += '?' + params.join('&');
+                    }
+                    data = emailUrl;
+                    break;
+                case 'event':
+                    const title = document.getElementById('event-title').value.trim() || 'Meeting';
+                    const eventDate = document.getElementById('event-date').value || '2024-01-01';
+                    const eventTime = document.getElementById('event-time').value || '10:00';
+                    const location = document.getElementById('event-location').value.trim() || '';
+                    const dateTime = eventDate.replace(/-/g, '') + 'T' + eventTime.replace(':', '') + '00';
+                    data = `BEGIN:VEVENT\nDTSTART:${dateTime}\nSUMMARY:${title}${location ? '\nLOCATION:' + location : ''}\nEND:VEVENT`;
+                    break;
+                case 'geo':
+                    const lat = document.getElementById('geo-lat').value.trim() || '40.7128';
+                    const lng = document.getElementById('geo-lng').value.trim() || '-74.0060';
+                    data = `geo:${lat},${lng}`;
+                    break;
+                case 'wifi':
+                    const ssid = document.getElementById('wifi-ssid').value.trim() || 'MyNetwork';
+                    const password = document.getElementById('wifi-password').value.trim() || '';
+                    const security = document.getElementById('wifi-security').value;
+                    data = `WIFI:T:${security};S:${ssid};P:${password};H:false;;`;
+                    break;
+                case 'myqr':
+                    data = document.getElementById('myqr-input').value.trim() || 'Custom Data';
+                    break;
+                default:
+                    data = 'Hello World!';
+                    break;
+            }
+            
+            if (encryptionEnabled && validatePasswords()) {
+                try {
+                    data = await encryptDataIfNeeded(data);
+                } catch (error) {
+                    console.error('Encryption failed:', error);
+                    showToast('Encryption failed. Generating unencrypted QR.');
+                }
+            }
+            
+            return data;
+        }
+
+        // Complete JavaScript code for QR Generator - Part 2
+
+        async function generateQRCode() {
+            if (!hasUserInput()) {
+                await updateQRVisibility();
+                return;
+            }
+
+            if (!libraryLoaded) {
+                await loadQRLibrary();
+            }
+
+            const qrContainer = document.getElementById("qr-code");
+            
+            if (qrCodeStyling) {
+                qrContainer.innerHTML = '';
+                qrCodeStyling = null;
+            }
+            
+            const quality = qualitySettings[currentQuality];
+            const bgTransparent = document.getElementById('bg-transparent').classList.contains('active');
+            const qrData = await getQRData();
+            
+            const qrOptions = {
+                width: quality.size,
+                height: quality.size,
+                data: qrData,
+                margin: Math.floor(currentPadding * (quality.size / qrDisplaySize)),
+                qrOptions: {
+                    typeNumber: quality.typeNumber,
+                    mode: 'Byte',
+                    errorCorrectionLevel: quality.errorLevel
+                },
+                backgroundOptions: {
+                    color: bgTransparent ? 'transparent' : bgColor,
+                },
+                imageOptions: {
+                    hideBackgroundDots: true,
+                    imageSize: logoSize,
+                    margin: logoPadding
+                }
+            };
+
+            // Apply gradient or solid color for QR dots
+            if (isGradient) {
+                qrOptions.dotsOptions = {
+                    type: currentPattern,
+                    gradient: createGradientConfig()
+                };
+            } else {
+                qrOptions.dotsOptions = {
+                    type: currentPattern,
+                    color: fgColor
+                };
+            }
+
+            // Apply corner colors based on user settings
+            if (cornerColorEnabled) {
+                qrOptions.cornersSquareOptions = {
+                    type: currentCornerPattern,
+                    color: cornerColor // Task 2: Use solid color only
+                };
+                qrOptions.cornersDotOptions = {
+                    type: currentCornerDotPattern,
+                    color: cornerColor // Task 2: Use solid color only
+                };
+            } else {
+                if (isGradient) {
+                    qrOptions.cornersSquareOptions = {
+                        type: currentCornerPattern,
+                        gradient: createGradientConfig()
+                    };
+                    qrOptions.cornersDotOptions = {
+                        type: currentCornerDotPattern,
+                        gradient: createGradientConfig()
+                    };
+                } else {
+                    qrOptions.cornersSquareOptions = {
+                        type: currentCornerPattern,
+                        color: fgColor
+                    };
+                    qrOptions.cornersDotOptions = {
+                        type: currentCornerDotPattern,
+                        color: fgColor
+                    };
+                }
+            }
+            
+            qrCodeStyling = new QRCodeStyling(qrOptions);
+
+            if (logoImage) {
+                qrCodeStyling.update({ image: logoImage });
+            }
+
+            qrCodeStyling.append(qrContainer);
+        }
+
+        // Advanced Color Picker Class Implementation
+        class ColorPicker {
+            constructor(onColorChange) {
+                this.onColorChange = onColorChange;
+                this.initElements();
+                this.currentColor = { r: 255, g: 0, b: 0 };
+                this.currentHue = 0;
+                this.isDragging = false;
+                this.initEventListeners();
+                this.updateColorCanvas(0);
+                this.updateInputValues();
+            }
+
+            initElements() {
+                this.closeBtn = document.getElementById("closeColorPicker");
+                this.input1 = document.getElementById("input1");
+                this.input2 = document.getElementById("input2");
+                this.input3 = document.getElementById("input3");
+                this.hueSlider = document.getElementById("hueSlider");
+                this.colorCanvas = document.getElementById("colorCanvas");
+                this.colorArHandle = document.getElementById("colorArHandle");
+                this.formatSelect = document.getElementById("colorFormat");
+                this.colorPreview = document.getElementById("colorPreview");
+                this.copyBtn = document.getElementById("copyBtn");
+                this.copyMessage = document.getElementById("copyMessage");
+                this.ctx = this.colorCanvas.getContext("2d");
+            }
+
+            initEventListeners() {
+                this.closeBtn.addEventListener("click", () => {
+                    closeModal('color-picker-modal');
+                });
+
+                this.hueSlider.addEventListener("input", (e) => {
+                    this.currentHue = parseInt(e.target.value);
+                    this.updateColorCanvas(this.currentHue);
+                    this.updateColorFromCanvas();
+                });
+
+                this.colorCanvas.addEventListener("mousedown", (e) => {
+                    this.isDragging = true;
+                    this.updateColorFromCanvasEvent(e);
+                });
+
+                this.colorCanvas.addEventListener("mousemove", (e) => {
+                    if (this.isDragging) {
+                        this.updateColorFromCanvasEvent(e);
+                    }
+                });
+
+                document.addEventListener("mouseup", () => {
+                    this.isDragging = false;
+                });
+
+                [this.input1, this.input2, this.input3].forEach((input) => {
+                    input.addEventListener("input", () => {
+                        this.updateColorFromInputs();
+                    });
+                });
+
+                this.formatSelect.addEventListener("change", () => {
+                    this.updateLabels();
+                    this.updateInputValues();
+                });
+
+                this.copyBtn.addEventListener("click", () => {
+                    this.copyColorValue();
+                });
+            }
+
+            setColor(hex) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                
+                this.currentColor = { r, g, b };
+                const hsv = this.rgbToHsv(r, g, b);
+                this.currentHue = hsv.h;
+                this.hueSlider.value = this.currentHue;
+                this.updateColorCanvas(this.currentHue);
+                this.updateHandleFromHsv(hsv);
+                this.updateInputValues();
+            }
+
+            updateColorCanvas(hue) {
+                const width = this.colorCanvas.width;
+                const height = this.colorCanvas.height;
+                
+                const hueColor = hue >= 359 ? "#000" : `hsl(${hue}, 100%, 50%)`;
+                
+                const gradientX = this.ctx.createLinearGradient(0, 0, width, 0);
+                gradientX.addColorStop(0, "#fff");
+                gradientX.addColorStop(1, hueColor);
+
+                this.ctx.fillStyle = gradientX;
+                this.ctx.fillRect(0, 0, width, height);
+
+                const gradientY = this.ctx.createLinearGradient(0, 0, 0, height);
+                gradientY.addColorStop(0, "rgba(0,0,0,0)");
+                gradientY.addColorStop(1, "#000");
+
+                this.ctx.fillStyle = gradientY;
+                this.ctx.fillRect(0, 0, width, height);
+            }
+
+            updateColorFromCanvasEvent(e) {
+                const rect = this.colorCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const clampedX = Math.max(0, Math.min(x, rect.width));
+                const clampedY = Math.max(0, Math.min(y, rect.height));
+                
+                this.colorArHandle.style.left = `${clampedX}px`;
+                this.colorArHandle.style.top = `${clampedY}px`;
+                
+                this.updateColorFromCanvas();
+            }
+
+            updateColorFromCanvas() {
+                const rect = this.colorCanvas.getBoundingClientRect();
+                
+                const x = (parseFloat(this.colorArHandle.style.left) || rect.width/2) / rect.width;
+                const y = (parseFloat(this.colorArHandle.style.top) || rect.height/2) / rect.height;
+                
+                const saturation = Math.min(100, Math.max(0, x * 100));
+                const value = Math.min(100, Math.max(0, (1 - y) * 100));
+                
+                this.currentColor = this.hsvToRgb(this.currentHue, saturation, value);
+                this.updateInputValues();
+                
+                if (this.onColorChange) {
+                    const hex = this.rgbToHex(this.currentColor.r, this.currentColor.g, this.currentColor.b);
+                    this.onColorChange(hex);
+                }
+            }
+
+            updateColorFromInputs() {
+                const format = this.formatSelect.value;
+                const val1 = parseFloat(this.input1.value) || 0;
+                const val2 = parseFloat(this.input2.value) || 0;
+                const val3 = parseFloat(this.input3.value) || 0;
+
+                if (format === "rgb") {
+                    this.currentColor = { r: val1, g: val2, b: val3 };
+                    const hsv = this.rgbToHsv(val1, val2, val3);
+                    this.currentHue = hsv.h;
+                    this.hueSlider.value = this.currentHue;
+                    this.updateColorCanvas(this.currentHue);
+                    this.updateHandleFromHsv(hsv);
+                }
+                
+                if (this.onColorChange) {
+                    const hex = this.rgbToHex(this.currentColor.r, this.currentColor.g, this.currentColor.b);
+                    this.onColorChange(hex);
+                }
+            }
+
+            updateHandleFromHsv(hsv) {
+                const rect = this.colorCanvas.getBoundingClientRect();
+                const x = (hsv.s / 100) * rect.width;
+                const y = (1 - hsv.v / 100) * rect.height;
+                
+                this.colorArHandle.style.left = `${x}px`;
+                this.colorArHandle.style.top = `${y}px`;
+            }
+
+            updateInputValues() {
+                const format = this.formatSelect.value;
+                
+                if (format === "rgb") {
+                    this.input1.value = Math.round(this.currentColor.r);
+                    this.input2.value = Math.round(this.currentColor.g);
+                    this.input3.value = Math.round(this.currentColor.b);
+                }
+                
+                this.updateLivePreview();
+            }
+
+            updateLivePreview() {
+                const rgb = `rgb(${this.currentColor.r}, ${this.currentColor.g}, ${this.currentColor.b})`;
+                this.colorPreview.style.background = rgb;
+            }
+
+            copyColorValue() {
+                const hex = this.rgbToHex(this.currentColor.r, this.currentColor.g, this.currentColor.b);
+                
+                navigator.clipboard.writeText(hex).then(() => {
+                    this.showCopySuccess('HEX');
+                }).catch(() => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = hex;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    this.showCopySuccess('HEX');
+                });
+            }
+
+            showCopySuccess(format) {
+                this.copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                this.copyMessage.textContent = `${format} copied!`;
+                this.copyMessage.classList.add('show');
+                
+                setTimeout(() => {
+                    this.copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                    this.copyMessage.classList.remove('show');
+                }, 2000);
+            }
+
+            updateLabels() {
+                document.getElementById("label1").innerText = "R";
+                document.getElementById("label2").innerText = "G";
+                document.getElementById("label3").innerText = "B";
+                
+                this.input1.max = 255;
+                this.input2.max = 255;
+                this.input3.max = 255;
+            }
+
+            rgbToHex(r, g, b) {
+                return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+            }
+
+            rgbToHsv(r, g, b) {
+                r /= 255;
+                g /= 255;
+                b /= 255;
+                
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const diff = max - min;
+                
+                let h = 0;
+                const s = max === 0 ? 0 : diff / max;
+                const v = max;
+                
+                if (diff !== 0) {
+                    switch (max) {
+                        case r: 
+                            h = ((g - b) / diff) % 6; 
+                            break;
+                        case g: 
+                            h = (b - r) / diff + 2; 
+                            break;
+                        case b: 
+                            h = (r - g) / diff + 4; 
+                            break;
+                    }
+                }
+                
+                h = h * 60;
+                if (h < 0) h += 360;
+                
+                return {
+                    h: Math.round(h),
+                    s: Math.round(s * 100),
+                    v: Math.round(v * 100)
+                };
+            }
+
+            hsvToRgb(h, s, v) {
+                h /= 60;
+                s /= 100;
+                v /= 100;
+                
+                const c = v * s;
+                const x = c * (1 - Math.abs((h % 2) - 1));
+                const m = v - c;
+                
+                let r = 0, g = 0, b = 0;
+                
+                if (h >= 0 && h < 1) {
+                    r = c; g = x; b = 0;
+                } else if (h >= 1 && h < 2) {
+                    r = x; g = c; b = 0;
+                } else if (h >= 2 && h < 3) {
+                    r = 0; g = c; b = x;
+                } else if (h >= 3 && h < 4) {
+                    r = 0; g = x; b = c;
+                } else if (h >= 4 && h < 5) {
+                    r = x; g = 0; b = c;
+                } else if (h >= 5 && h < 6) {
+                    r = c; g = 0; b = x;
+                }
+                
+                return {
+                    r: Math.round((r + m) * 255),
+                    g: Math.round((g + m) * 255),
+                    b: Math.round((b + m) * 255)
+                };
+            }
+        }
+
+        let colorPickerInstance = null;
+        let currentColorTarget = null;
+
+        async function openColorPicker(target) {
+            currentColorTarget = target;
+            
+            if (!colorPickerInstance) {
+                colorPickerInstance = new ColorPicker(async (hex) => {
+                    if (currentColorTarget === 'fg') {
+                        fgColor = hex;
+                        document.getElementById('fg-input').value = hex;
+                        document.getElementById('fg-preview').style.background = hex;
+                    } else if (currentColorTarget === 'fg2') {
+                        fg2Color = hex;
+                        document.getElementById('fg2-input').value = hex;
+                        document.getElementById('fg2-preview').style.background = hex;
+                    } else if (currentColorTarget === 'bg') {
+                        bgColor = hex;
+                        document.getElementById('bg-input').value = hex;
+                        document.getElementById('bg-preview').style.background = hex;
+                    } else if (currentColorTarget === 'corner') {
+                        // Task 2: Only solid color for corner, no gradient
+                        cornerColor = hex;
+                        cornerColor2 = hex; // Set same color for both
+                        updateCornerToggleUI();
+                    }
+                    if (hasUserInput()) await generateQRCode();
+                });
+            }
+            
+            let currentColor = fgColor;
+            if (target === 'fg2') currentColor = fg2Color;
+            else if (target === 'bg') currentColor = bgColor;
+            else if (target === 'corner') currentColor = cornerColor;
+            
+            colorPickerInstance.setColor(currentColor);
+            colorPickerInstance.updateLabels();
+            
+            openModal('color-picker-modal');
+        }
+
+        // Bulk QR Generation Functions
+        function loadPapaParse() {
+            return new Promise((resolve, reject) => {
+                if (typeof Papa !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js';
+                script.onload = () => {
+                    resolve();
+                };
+                script.onerror = () => {
+                    reject(new Error('Failed to load CSV parser'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function loadSheetJS() {
+            return new Promise((resolve, reject) => {
+                if (typeof XLSX !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                script.onload = () => {
+                    resolve();
+                };
+                script.onerror = () => {
+                    reject(new Error('Failed to load Excel parser'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function loadJSZip() {
+            if (jsZipLoaded) return Promise.resolve();
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                script.onload = () => {
+                    jsZipLoaded = true;
+                    resolve();
+                };
+                script.onerror = () => {
+                    showToast('Failed to load ZIP library. Please refresh.');
+                    reject();
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        async function handleFileUpload(file) {
+            const fileName = file.name.toLowerCase();
+            const isCSV = fileName.endsWith('.csv') || file.type === 'text/csv' || file.type === 'application/csv';
+            const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || 
+                          file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                          file.type === 'application/vnd.ms-excel';
+            
+            if (!isCSV && !isExcel) {
+                showToast('Please upload a valid CSV or Excel file');
+                return;
+            }
+
+            showToast('Processing file...');
+            
+            try {
+                let data;
+                if (isCSV) {
+                    await loadPapaParse();
+                    data = await parseCSV(file);
+                } else if (isExcel) {
+                    await loadSheetJS();
+                    data = await parseExcel(file);
+                }
+                
+                if (data && data.length > 0) {
+                    bulkData = data;
+                    displayBulkPreview(data);
+                    showToast(`Loaded ${data.length} items successfully`);
+                    updateQRVisibility();
+                } else {
+                    showToast('No valid data found in file');
+                }
+            } catch (error) {
+                showToast(`Error processing file: ${error.message}`);
+            }
+        }
+
+        function parseCSV(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const csv = e.target.result;
+                        
+                        if (typeof Papa === 'undefined') {
+                            reject(new Error('CSV parser not available'));
+                            return;
+                        }
+                        
+                        const parsed = Papa.parse(csv, {
+                            header: true,
+                            skipEmptyLines: true,
+                            dynamicTyping: false,
+                            delimitersToGuess: [',', '\t', '|', ';']
+                        });
+                        
+                        if (!parsed.data || parsed.data.length === 0) {
+                            reject(new Error('No data found in CSV'));
+                            return;
+                        }
+                        
+                        const processedData = processParsedData(parsed.data);
+                        resolve(processedData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        function parseExcel(file) {
+            return new Promise((resolve, reject) => {
+                if (typeof XLSX === 'undefined') {
+                    reject(new Error('Excel parser not available'));
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        if (jsonData.length < 2) {
+                            resolve([]);
+                            return;
+                        }
+                        
+                        const headers = jsonData[0];
+                        const rows = jsonData.slice(1);
+                        const objectData = rows.map(row => {
+                            const obj = {};
+                            headers.forEach((header, index) => {
+                                obj[header] = row[index] || '';
+                            });
+                            return obj;
+                        });
+                        
+                        const processedData = processParsedData(objectData);
+                        resolve(processedData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Failed to read Excel file'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function processParsedData(rawData) {
+            if (!Array.isArray(rawData)) {
+                return [];
+            }
+            
+            return rawData.map((row, index) => {
+                const name = row.Name || row.name || row.NAME || `QR_${index + 1}`;
+                const content = row.Content || row.content || row.CONTENT || row.Data || row.data || row.DATA || '';
+                const type = (row.Type || row.type || row.TYPE || 'text').toLowerCase();
+                
+                const processed = {
+                    id: index + 1,
+                    name: name.toString().trim(),
+                    content: content.toString().trim(),
+                    type: type,
+                    valid: false,
+                    error: ''
+                };
+
+                if (!processed.content) {
+                    processed.error = 'Content is required';
+                } else if (!['text', 'url', 'contact', 'phone', 'email', 'event', 'geo', 'wifi'].includes(processed.type)) {
+                    processed.error = `Invalid type: ${processed.type}`;
+                    processed.type = 'text';
+                    processed.valid = true;
+                } else {
+                    processed.valid = true;
+                }
+
+                return processed;
+            }).filter(item => item.name && item.content);
+        }
+
+        function displayBulkPreview(data) {
+            const preview = document.getElementById('bulk-preview');
+            const tbody = document.getElementById('bulk-preview-tbody');
+            const countSpan = document.getElementById('preview-count');
+            const validCount = document.getElementById('valid-count');
+            const invalidCount = document.getElementById('invalid-count');
+            const bulkCount = document.getElementById('bulk-count');
+            const generateBtn = document.getElementById('generate-bulk');
+
+            tbody.innerHTML = '';
+
+            const valid = data.filter(item => item.valid).length;
+            const invalid = data.length - valid;
+
+            countSpan.textContent = data.length;
+            validCount.textContent = valid;
+            invalidCount.textContent = invalid;
+            bulkCount.textContent = valid;
+
+            if (generateBtn) {
+                generateBtn.disabled = valid === 0;
+            }
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                if (!item.valid) row.classList.add('invalid');
+
+                row.innerHTML = `
+                    <td><input type="text" class="edit-cell" value="${item.name}" data-field="name" data-index="${index}"></td>
+                    <td><input type="text" class="edit-cell" value="${item.content}" data-field="content" data-index="${index}"></td>
+                    <td>
+                        <select class="edit-cell" data-field="type" data-index="${index}">
+                            <option value="text" ${item.type === 'text' ? 'selected' : ''}>Text</option>
+                            <option value="url" ${item.type === 'url' ? 'selected' : ''}>URL</option>
+                            <option value="contact" ${item.type === 'contact' ? 'selected' : ''}>Contact</option>
+                            <option value="phone" ${item.type === 'phone' ? 'selected' : ''}>Phone</option>
+                            <option value="email" ${item.type === 'email' ? 'selected' : ''}>Email</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="delete-row-btn" data-index="${index}">✕</button>
+                        ${!item.valid ? `<div style="margin-top: 8px; padding: 4px 8px; background: #fef2f2; border-radius: 4px; font-size: 12px; color: #dc2626;">${item.error}</div>` : ''}
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            tbody.querySelectorAll('.edit-cell').forEach(input => {
+                input.addEventListener('change', updateBulkData);
+            });
+
+            tbody.querySelectorAll('.delete-row-btn').forEach(btn => {
+                btn.addEventListener('click', deleteBulkRow);
+            });
+
+            document.getElementById('sample-format').style.display = 'block';
+            preview.style.display = 'block';
+        }
+
+        function updateBulkData(event) {
+            const field = event.target.dataset.field;
+            const index = parseInt(event.target.dataset.index);
+            const value = event.target.value;
+
+            if (bulkData[index]) {
+                bulkData[index][field] = value;
+                
+                const item = bulkData[index];
+                if (!item.content.trim()) {
+                    item.error = 'Content is required';
+                    item.valid = false;
+                } else {
+                    item.error = '';
+                    item.valid = true;
+                }
+
+                const row = event.target.closest('tr');
+                if (item.valid) {
+                    row.classList.remove('invalid');
+                } else {
+                    row.classList.add('invalid');
+                }
+
+                updateBulkCounters();
+            }
+        }
+
+        function updateBulkCounters() {
+            const validCount = document.getElementById('valid-count');
+            const invalidCount = document.getElementById('invalid-count');
+            const bulkCount = document.getElementById('bulk-count');
+            const generateBtn = document.getElementById('generate-bulk');
+            const previewCount = document.getElementById('preview-count');
+
+            const valid = bulkData.filter(item => item.valid).length;
+            const invalid = bulkData.length - valid;
+
+            if (validCount) validCount.textContent = valid;
+            if (invalidCount) invalidCount.textContent = invalid;
+            if (bulkCount) bulkCount.textContent = valid;
+            if (previewCount) previewCount.textContent = bulkData.length;
+            if (generateBtn) generateBtn.disabled = valid === 0;
+        }
+
+        function deleteBulkRow(event) {
+            const index = parseInt(event.target.dataset.index);
+            bulkData.splice(index, 1);
+            
+            bulkData.forEach((item, newIndex) => {
+                item.id = newIndex + 1;
+            });
+            
+            displayBulkPreview(bulkData);
+        }
+
+        function downloadSampleCSV() {
+            const sampleData = [
+                ['Name', 'Content', 'Type'],
+                ['Website', 'https://example.com', 'url'],
+                ['Contact Card', 'John Doe|+1234567890|john@email.com', 'contact'],
+                ['Phone Number', '+1234567890', 'phone'],
+                ['Simple Text', 'Hello World!', 'text']
+            ];
+
+            const csv = sampleData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'qr_bulk_sample.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Sample CSV downloaded');
+        }
+
+        function clearBulkData() {
+            bulkData = [];
+            
+            document.getElementById('bulk-preview').style.display = 'none';
+            document.getElementById('sample-format').style.display = 'none';
+            document.getElementById('bulk-results').style.display = 'none';
+            document.getElementById('bulk-progress').style.display = 'none';
+            document.getElementById('bulk-upload-area').style.display = 'block';
+            document.getElementById('bulk-file-input').value = '';
+            
+            generatedQRs = [];
+            updateQRVisibility();
+            showToast('Data cleared successfully');
+        }
+
+        async function startBulkGeneration() {
+            if (bulkGenerationInProgress) return;
+            
+            const validItems = bulkData.filter(item => item.valid);
+            if (validItems.length === 0) {
+                showToast('No valid items to generate');
+                return;
+            }
+
+            if (encryptionEnabled && !validatePasswords()) {
+                showToast('Please set a valid password for encryption');
+                return;
+            }
+
+            if (encryptionEnabled && !cryptoJSLoaded) {
+                try {
+                    await loadCryptoJS();
+                } catch (error) {
+                    showToast('Failed to load encryption library');
+                    encryptionEnabled = false;
+                }
+            }
+
+            if (!jsZipLoaded) {
+                await loadJSZip();
+            }
+
+            bulkGenerationInProgress = true;
+            generatedQRs = [];
+
+            document.getElementById('bulk-preview').style.display = 'none';
+            const progressDiv = document.getElementById('bulk-progress');
+            progressDiv.style.display = 'block';
+
+            const progressFill = document.getElementById('progress-fill');
+            const progressCurrent = document.getElementById('progress-current');
+            const progressTotal = document.getElementById('progress-total');
+            const progressStatus = document.getElementById('progress-status');
+
+            progressTotal.textContent = validItems.length;
+            progressCurrent.textContent = '0';
+            
+            const batchSize = 5;
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < validItems.length; i += batchSize) {
+                const batch = validItems.slice(i, i + batchSize);
+                
+                await Promise.all(batch.map(async (item, batchIndex) => {
+                    const globalIndex = i + batchIndex;
+                    
+                    try {
+                        progressStatus.textContent = `Generating: ${item.name}`;
+                        const qrDataUrl = await generateSingleQR(item);
+                        
+                        generatedQRs.push({
+                            name: item.name,
+                            dataUrl: qrDataUrl,
+                            success: true,
+                            encrypted: encryptionEnabled
+                        });
+                        
+                        successCount++;
+                    } catch (error) {
+                        generatedQRs.push({
+                            name: item.name,
+                            error: error.message,
+                            success: false
+                        });
+                        errorCount++;
+                    }
+                    
+                    const completed = globalIndex + 1;
+                    progressCurrent.textContent = completed;
+                    const percentage = (completed / validItems.length) * 100;
+                    progressFill.style.width = percentage + '%';
+                }));
+
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            bulkGenerationInProgress = false;
+            progressDiv.style.display = 'none';
+
+            const resultsDiv = document.getElementById('bulk-results');
+            document.getElementById('success-count').textContent = successCount;
+            document.getElementById('error-count').textContent = errorCount;
+            resultsDiv.style.display = 'block';
+
+            showToast(`Generation complete! ${successCount} successful, ${errorCount} failed`);
+        }
+
+        async function generateSingleQR(item) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    if (!libraryLoaded) {
+                        await loadQRLibrary();
+                    }
+
+                    let data = await getBulkQRData(item);
+                    const quality = qualitySettings[currentQuality];
+                    const bgTransparent = document.getElementById('bg-transparent').classList.contains('active');
+
+                    const qrOptions = {
+                        width: quality.size,
+                        height: quality.size,
+                        data: data,
+                        margin: Math.floor(currentPadding * (quality.size / qrDisplaySize)),
+                        qrOptions: {
+                            typeNumber: quality.typeNumber,
+                            mode: 'Byte',
+                            errorCorrectionLevel: quality.errorLevel
+                        },
+                        backgroundOptions: {
+                            color: bgTransparent ? 'transparent' : bgColor,
+                        },
+                        dotsOptions: {
+                            type: currentPattern,
+                            color: fgColor
+                        },
+                        cornersSquareOptions: {
+                            type: currentCornerPattern,
+                            color: fgColor
+                        },
+                        cornersDotOptions: {
+                            type: currentCornerDotPattern,
+                            color: fgColor
+                        }
+                    };
+
+                    const tempQR = new QRCodeStyling(qrOptions);
+                    const blob = await tempQR.getRawData("png");
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Failed to read QR data'));
+                    reader.readAsDataURL(blob);
+
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
+        async function getBulkQRData(item) {
+            const { content, type } = item;
+            let data = '';
+            
+            switch(type) {
+                case 'url':
+                    let url = content.trim();
+                    if (!url.match(/^https?:\/\//)) {
+                        url = 'https://' + url;
+                    }
+                    data = url;
+                    break;
+                case 'contact':
+                    const parts = content.split('|');
+                    const name = parts[0] || 'Contact';
+                    const phone = parts[1] || '';
+                    const email = parts[2] || '';
+                    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}${phone ? '\nTEL:' + phone : ''}${email ? '\nEMAIL:' + email : ''}\nEND:VCARD`;
+                    break;
+                case 'phone':
+                    data = `tel:${content}`;
+                    break;
+                case 'email':
+                    data = `mailto:${content}`;
+                    break;
+                default:
+                    data = content;
+                    break;
+            }
+            
+            if (encryptionEnabled && validatePasswords()) {
+                try {
+                    data = await encryptDataIfNeeded(data);
+                } catch (error) {
+                    console.error('Bulk encryption failed:', error);
+                }
+            }
+            
+            return data;
+        }
+
+        async function downloadBulkZip() {
+            if (!jsZipLoaded || generatedQRs.length === 0) {
+                showToast('No QR codes to download');
+                return;
+            }
+
+            const zip = new JSZip();
+            const successfulQRs = generatedQRs.filter(qr => qr.success);
+
+            if (successfulQRs.length === 0) {
+                showToast('No successful QR codes to download');
+                return;
+            }
+
+            showToast('Creating ZIP file...');
+
+            successfulQRs.forEach((qr) => {
+                const base64Data = qr.dataUrl.split(',')[1];
+                const encryptedPrefix = qr.encrypted ? 'ENCRYPTED_' : '';
+                const fileName = `${encryptedPrefix}${qr.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                zip.file(fileName, base64Data, { base64: true });
+            });
+
+            const encryptedCount = successfulQRs.filter(qr => qr.encrypted).length;
+            if (encryptedCount > 0) {
+                const infoContent = `QR Code Encryption Information\n${encryptedCount} of ${successfulQRs.length} QR codes are encrypted.\nGenerated on: ${new Date().toLocaleString()}`;
+                zip.file('ENCRYPTION_INFO.txt', infoContent);
+            }
+
+            try {
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const url = URL.createObjectURL(zipBlob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QR_Codes_${new Date().toISOString().split('T')[0]}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast(`Downloaded ${successfulQRs.length} QR codes as ZIP`);
+            } catch (error) {
+                showToast('Failed to create ZIP file');
+            }
+        }
+
+        function startNewBatch() {
+            clearBulkData();
+            document.getElementById('bulk-progress').style.display = 'none';
+            document.getElementById('bulk-results').style.display = 'none';
+            generatedQRs = [];
+        }
+
+        // Utility Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function updateCornerToggleUI() {
+            const cornerToggle = document.getElementById('corner-color-toggle');
+            
+            if (!cornerToggle) return;
+            
+            if (cornerColorEnabled) {
+                cornerToggle.classList.add('active');
+                // Task 2: Show solid color instead of gradient
+                cornerToggle.style.background = cornerColor;
+            } else {
+                cornerToggle.classList.remove('active');
+                cornerToggle.style.background = '#f5f5f5';
+            }
+        }
+
+        function validateInput(type, value) {
+            const validation = { valid: true, message: '' };
+            
+            switch(type) {
+                case 'url':
+                    if (value.trim()) {
+                        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+                        if (!urlPattern.test(value)) {
+                            validation.valid = false;
+                            validation.message = 'Please enter a valid URL';
+                        }
+                    }
+                    break;
+                case 'email':
+                    if (value.trim()) {
+                        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailPattern.test(value)) {
+                            validation.valid = false;
+                            validation.message = 'Please enter a valid email address';
+                        }
+                    }
+                    break;
+                case 'phone':
+                    if (value.trim()) {
+                        const phonePattern = /^[\+]?[1-9][\d]{0,15}$/;
+                        if (!phonePattern.test(value.replace(/[\s\-\(\)]/g, ''))) {
+                            validation.valid = false;
+                            validation.message = 'Please enter a valid phone number';
+                        }
+                    }
+                    break;
+                case 'geo-coords':
+                    if (value.trim()) {
+                        const coord = parseFloat(value);
+                        if (isNaN(coord)) {
+                            validation.valid = false;
+                            validation.message = 'Please enter a valid coordinate';
+                        }
+                    }
+                    break;
+            }
+            
+            return validation;
+        }
+
+        function showValidationError(element, message) {
+            element.style.borderColor = '#ff4444';
+            element.title = message;
+            setTimeout(() => {
+                element.style.borderColor = '';
+                element.title = '';
+            }, 3000);
+        }
+
+        function clearValidationError(element) {
+            element.style.borderColor = '';
+            element.title = '';
+        }
+
+        let updateTimeout;
+        function debounceUpdate() {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(async () => {
+                await updateQRVisibility();
+            }, 200);
+        }
+
+        let encryptionUpdateTimeout;
+        function debounceQRUpdate() {
+            clearTimeout(encryptionUpdateTimeout);
+            encryptionUpdateTimeout = setTimeout(async () => {
+                await generateQRCode();
+            }, 500);
+        }
+
+        // Main DOMContentLoaded Event Handler - Complete Implementation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Contact Picker functionality
+            const contactPickerBtn = document.getElementById('contact-picker-btn');
+            const contactPickerBtn2 = document.getElementById('contact-picker-btn-2');
+            const phoneNumberInput = document.getElementById('phone-number');
+            const contactPhoneInput = document.getElementById('contact-phone');
+            
+            function setupContactPicker(button, input) {
+                if (!button || !input) return;
+                
+                // Check if Contact Picker API is supported
+                if ('contacts' in navigator && 'ContactsManager' in window) {
+                    button.addEventListener('click', async function() {
+                        try {
+                            const contacts = await navigator.contacts.select(['tel'], { multiple: false });
+                            if (contacts.length > 0 && contacts[0].tel && contacts[0].tel.length > 0) {
+                                input.value = contacts[0].tel[0];
+                                await updateQRVisibility();
+                                showToast('Contact selected successfully!');
+                            }
+                        } catch (error) {
+                            if (error.name === 'NotAllowedError') {
+                                showToast('Contact access denied. Please allow contact permissions.');
+                            } else {
+                                showToast('Could not access contacts. Feature may not be supported.');
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback for unsupported browsers
+                    button.addEventListener('click', function() {
+                        showToast('Contact picker not supported on this device/browser. Please enter phone number manually.');
+                    });
+                    
+                    // Show visual indication that feature is limited
+                    button.style.opacity = '0.6';
+                    button.title = 'Contact picker not supported on this device';
+                }
+            }
+            
+            setupContactPicker(contactPickerBtn, phoneNumberInput);
+            setupContactPicker(contactPickerBtn2, contactPhoneInput);
+
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    
+                    currentType = this.getAttribute('data-type');
+                    const targetForm = document.getElementById(currentType + '-form');
+                    if (targetForm) {
+                        targetForm.classList.add('active');
+                    }
+                    
+                    updateContentTypeBadge();
+                    updateQRVisibility();
+                });
+            });
+
+            // Encryption controls
+            const encryptionToggle = document.getElementById('encryption-toggle');
+            const encryptionControls = document.getElementById('encryption-controls');
+            const passwordInput = document.getElementById('encrypt-password');
+            const confirmInput = document.getElementById('encrypt-confirm');
+            const methodSelect = document.getElementById('encryption-method');
+
+            if (encryptionToggle) {
+                encryptionToggle.addEventListener('click', function() {
+                    encryptionEnabled = !encryptionEnabled;
+                    
+                    if (encryptionEnabled) {
+                        this.classList.add('active');
+                        encryptionControls.style.display = 'block';
+                    } else {
+                        this.classList.remove('active');
+                        encryptionControls.style.display = 'none';
+                        encryptPassword = '';
+                        encryptConfirm = '';
+                    }
+
+                    if (hasUserInput()) {
+                        generateQRCode();
+                    }
+                });
+
+                if (passwordInput && confirmInput) {
+                    passwordInput.addEventListener('input', function() {
+                        encryptPassword = this.value;
+                        validatePasswords();
+                        if (hasUserInput() && encryptionEnabled) {
+                            debounceQRUpdate();
+                        }
+                    });
+
+                    confirmInput.addEventListener('input', function() {
+                        encryptConfirm = this.value;
+                        validatePasswords();
+                        if (hasUserInput() && encryptionEnabled) {
+                            debounceQRUpdate();
+                        }
+                    });
+                }
+
+                if (methodSelect) {
+                    methodSelect.addEventListener('change', function() {
+                        encryptionMethod = this.value;
+                        if (hasUserInput() && encryptionEnabled && validatePasswords()) {
+                            debounceQRUpdate();
+                        }
+                    });
+                }
+            }
+
+            // Location Help Buttons
+            const latHelpBtn = document.getElementById('lat-help');
+            const lngHelpBtn = document.getElementById('lng-help');
+            
+            if (latHelpBtn && lngHelpBtn) {
+                latHelpBtn.addEventListener('click', function() {
+                    openModal('location-help-modal');
+                });
+                
+                lngHelpBtn.addEventListener('click', function() {
+                    openModal('location-help-modal');
+                });
+            }
+
+            // GPS Prompt Modal Controls
+            const enableLocationBtn = document.getElementById('enable-location');
+            const cancelLocationBtn = document.getElementById('cancel-location');
+            
+            if (enableLocationBtn && cancelLocationBtn) {
+                enableLocationBtn.addEventListener('click', function() {
+                    closeModal('gps-prompt-modal');
+                    startLocationRequest();
+                });
+                
+                cancelLocationBtn.addEventListener('click', function() {
+                    closeModal('gps-prompt-modal');
+                });
+            }
+
+            // Geolocation - Show GPS prompt first
+            const getCurrentLocationBtn = document.getElementById('get-current-location');
+            const latInput = document.getElementById('geo-lat');
+            const lngInput = document.getElementById('geo-lng');
+            
+            if (getCurrentLocationBtn && latInput && lngInput) {
+                getCurrentLocationBtn.addEventListener('click', function() {
+                    if (!navigator.geolocation) {
+                        showToast('आपका ब्राउज़र location सेवा को सपोर्ट नहीं करता');
+                        return;
+                    }
+                    
+                    // Show GPS prompt modal first
+                    openModal('gps-prompt-modal');
+                });
+            }
+
+            // Function to actually request location
+            function startLocationRequest() {
+                const getCurrentLocationBtn = document.getElementById('get-current-location');
+                const latInput = document.getElementById('geo-lat');
+                const lngInput = document.getElementById('geo-lng');
+                const btnText = getCurrentLocationBtn.querySelector('.btn-text');
+                const originalText = btnText.textContent;
+                
+                getCurrentLocationBtn.disabled = true;
+                btnText.innerHTML = '<span class="loading"></span>Location पा रहे हैं...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        
+                        latInput.value = lat;
+                        lngInput.value = lng;
+                        
+                        getCurrentLocationBtn.disabled = false;
+                        btnText.textContent = originalText;
+                        
+                        showToast('Location सफलतापूर्वक मिल गया!');
+                        await updateQRVisibility();
+                    },
+                    (error) => {
+                        getCurrentLocationBtn.disabled = false;
+                        btnText.textContent = originalText;
+                        
+                        let errorMessage = 'Location नहीं मिल सका';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Location की अनुमति नहीं दी गई। कृपया browser settings में location access को allow करें।';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Location की जानकारी उपलब्ध नहीं है। कृपया GPS/Location को ON करें।';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Location पाने में समय लग रहा। कृपया दोबारा कोशिश करें।';
+                                break;
+                        }
+                        showToast(errorMessage);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 60000
+                    }
+                );
+            }
+
+            // Hex inputs
+            const fgInput = document.getElementById('fg-input');
+            const fg2Input = document.getElementById('fg2-input');
+            const bgInput = document.getElementById('bg-input');
+            
+            if (fgInput) {
+                fgInput.addEventListener('input', async function() {
+                    const value = this.value.toUpperCase();
+                    if (isValidHex(value)) {
+                        fgColor = value;
+                        document.getElementById('fg-preview').style.background = value;
+                        this.classList.remove('invalid');
+                        if (hasUserInput()) await generateQRCode();
+                    } else {
+                        this.classList.add('invalid');
+                    }
+                });
+            }
+            
+            if (fg2Input) {
+                fg2Input.addEventListener('input', async function() {
+                    const value = this.value.toUpperCase();
+                    if (isValidHex(value)) {
+                        fg2Color = value;
+                        document.getElementById('fg2-preview').style.background = value;
+                        this.classList.remove('invalid');
+                        if (hasUserInput()) await generateQRCode();
+                    } else {
+                        this.classList.add('invalid');
+                    }
+                });
+            }
+            
+            if (bgInput) {
+                bgInput.addEventListener('input', async function() {
+                    const value = this.value.toUpperCase();
+                    if (isValidHex(value)) {
+                        bgColor = value;
+                        document.getElementById('bg-preview').style.background = value;
+                        this.classList.remove('invalid');
+                        if (hasUserInput()) await generateQRCode();
+                    } else {
+                        this.classList.add('invalid');
+                    }
+                });
+            }
+
+            // Color events
+            const fgPreview = document.getElementById('fg-preview');
+            const fg2Preview = document.getElementById('fg2-preview');
+            const bgPreview = document.getElementById('bg-preview');
+            const bgTransparent = document.getElementById('bg-transparent');
+            
+            if (fgPreview) {
+                fgPreview.addEventListener('click', () => {
+                    openColorPicker('fg');
+                });
+            }
+            
+            if (fg2Preview) {
+                fg2Preview.addEventListener('click', () => {
+                    openColorPicker('fg2');
+                });
+            }
+            
+            if (bgPreview && bgTransparent) {
+                bgPreview.addEventListener('click', () => {
+                    if (!bgTransparent.classList.contains('active')) {
+                        openColorPicker('bg');
+                    }
+                });
+            }
+
+            // Gradient controls
+            const gradientSlider = document.getElementById('gradient-direction-slider');
+            const gradientValue = document.getElementById('gradient-direction-value');
+            
+            if (gradientSlider && gradientValue) {
+                gradientSlider.addEventListener('input', async function() {
+                    gradientAngle = parseInt(this.value);
+                    gradientValue.textContent = gradientAngle + '°';
+                    if (isGradient && hasUserInput()) {
+                        await generateQRCode();
+                    }
+                });
+            }
+
+            // Color mode toggle
+            const solidBtn = document.getElementById('fg-solid');
+            const gradientBtn = document.getElementById('fg-gradient');
+            const gradientSection = document.getElementById('gradient-section');
+            const fgLabel = document.querySelector('#fg-container .color-label');
+            
+            solidBtn.addEventListener('click', async function() {
+                if (!this.classList.contains('active')) {
+                    gradientBtn.classList.remove('active');
+                    this.classList.add('active');
+                    isGradient = false;
+                    gradientSection.style.display = 'none';
+                    fgLabel.textContent = 'FOREGROUND HEX';
+                    
+                    if (hasUserInput()) {
+                        await generateQRCode();
+                    }
+                }
+            });
+
+            gradientBtn.addEventListener('click', async function() {
+                if (!this.classList.contains('active')) {
+                    solidBtn.classList.remove('active');
+                    this.classList.add('active');
+                    isGradient = true;
+                    gradientSection.style.display = 'block';
+                    fgLabel.textContent = 'FOREGROUND START HEX';
+                    if (hasUserInput()) await generateQRCode();
+                }
+            });
+
+            // Transparency toggle
+            if (bgTransparent) {
+                const bgContainer = document.querySelector('.bg-container');
+                const bgPreview = document.querySelector('.bg-preview');
+                
+                bgTransparent.addEventListener('click', async function() {
+                    this.classList.toggle('active');
+                    const isTransparent = this.classList.contains('active');
+                    
+                    if (isTransparent) {
+                        bgContainer.classList.add('disabled');
+                        bgPreview.classList.add('disabled');
+                    } else {
+                        bgContainer.classList.remove('disabled');
+                        bgPreview.classList.remove('disabled');
+                    }
+                    
+                    if (hasUserInput()) await generateQRCode();
+                });
+            }
+
+            // Corner color toggle
+            const cornerToggle = document.getElementById('corner-color-toggle');
+            
+            if (cornerToggle) {
+                updateCornerToggleUI();
+                
+                cornerToggle.addEventListener('click', async function() {
+                    if (!cornerColorEnabled) {
+                        cornerColorEnabled = true;
+                        updateCornerToggleUI();
+                        openColorPicker('corner');
+                    } else {
+                        cornerColorEnabled = false;
+                        updateCornerToggleUI();
+                        if (hasUserInput()) await generateQRCode();
+                    }
+                });
+            }
+
+            // Bulk QR initialization
+            const uploadArea = document.getElementById('bulk-upload-area');
+            const fileInput = document.getElementById('bulk-file-input');
+            const downloadSample = document.getElementById('download-sample');
+            const clearData = document.getElementById('clear-bulk-data');
+            const generateBulk = document.getElementById('generate-bulk');
+            const downloadZip = document.getElementById('download-zip');
+            const startNew = document.getElementById('start-new-bulk');
+
+            if (uploadArea && fileInput) {
+                uploadArea.addEventListener('click', () => fileInput.click());
+                
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+                
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+                
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileUpload(files[0]);
+                    }
+                });
+                
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleFileUpload(e.target.files[0]);
+                    }
+                });
+            }
+
+            if (downloadSample) {
+                downloadSample.addEventListener('click', downloadSampleCSV);
+            }
+
+            if (clearData) {
+                clearData.addEventListener('click', clearBulkData);
+            }
+
+            if (generateBulk) {
+                generateBulk.addEventListener('click', startBulkGeneration);
+            }
+
+            if (downloadZip) {
+                downloadZip.addEventListener('click', downloadBulkZip);
+            }
+
+            if (startNew) {
+                startNew.addEventListener('click', startNewBatch);
+            }
+
+            // Pattern buttons
+            document.getElementById('qr-pattern').addEventListener('click', () => openModal('qr-pattern-modal'));
+            document.getElementById('corner-pattern').addEventListener('click', () => openModal('corner-pattern-modal'));
+            document.getElementById('corner-dot').addEventListener('click', () => openModal('corner-dot-modal'));
+            document.getElementById('quality-btn').addEventListener('click', () => openModal('quality-modal'));
+            document.getElementById('logo-btn').addEventListener('click', () => openModal('logo-modal'));
+
+            // Close buttons
+            document.querySelectorAll('[data-close]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(btn.getAttribute('data-close'));
+                });
+            });
+
+            // Pattern selections
+            document.querySelectorAll('[data-pattern]').forEach(option => {
+                option.addEventListener('click', async () => {
+                    document.querySelectorAll('[data-pattern]').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    currentPattern = option.getAttribute('data-pattern');
+                    if (hasUserInput()) await generateQRCode();
+                    closeModal('qr-pattern-modal');
+                });
+            });
+
+            document.querySelectorAll('[data-corner]').forEach(option => {
+                option.addEventListener('click', async () => {
+                    document.querySelectorAll('[data-corner]').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    currentCornerPattern = option.getAttribute('data-corner');
+                    if (hasUserInput()) await generateQRCode();
+                    closeModal('corner-pattern-modal');
+                });
+            });
+
+            document.querySelectorAll('[data-corner-dot]').forEach(option => {
+                option.addEventListener('click', async () => {
+                    document.querySelectorAll('[data-corner-dot]').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    currentCornerDotPattern = option.getAttribute('data-corner-dot');
+                    if (hasUserInput()) await generateQRCode();
+                    closeModal('corner-dot-modal');
+                });
+            });
+
+            // Quality selection
+            document.querySelectorAll('[data-quality]').forEach(option => {
+                option.addEventListener('click', async () => {
+                    document.querySelectorAll('[data-quality]').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    currentQuality = option.getAttribute('data-quality');
+                    if (hasUserInput()) await generateQRCode();
+                    closeModal('quality-modal');
+                });
+            });
+
+            // Logo upload
+            document.getElementById('logo-upload').addEventListener('click', () => {
+                document.getElementById('logo-input').click();
+            });
+
+            document.getElementById('logo-input').addEventListener('change', async function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        logoImage = e.target.result;
+                        document.getElementById('logo-preview').src = logoImage;
+                        document.getElementById('logo-preview').style.display = 'block';
+                        
+                        document.getElementById('remove-logo-btn').disabled = false;
+                        
+                        if (hasUserInput()) await generateQRCode();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Remove logo
+            document.getElementById('remove-logo-btn').addEventListener('click', async function() {
+                logoImage = null;
+                document.getElementById('logo-preview').style.display = 'none';
+                document.getElementById('logo-preview').src = '';
+                document.getElementById('logo-input').value = '';
+                this.disabled = true;
+                if (hasUserInput()) await generateQRCode();
+                showToast('Logo removed successfully!');
+            });
+
+            // Logo sliders
+            document.getElementById('logo-size-slider').addEventListener('input', async function() {
+                logoSize = parseFloat(this.value);
+                document.getElementById('logo-size-value').textContent = logoSize;
+                if (hasUserInput()) await generateQRCode();
+            });
+
+            document.getElementById('logo-padding-slider').addEventListener('input', async function() {
+                logoPadding = parseInt(this.value);
+                document.getElementById('logo-padding-value').textContent = logoPadding + 'px';
+                if (hasUserInput()) await generateQRCode();
+            });
+
+            // Padding slider
+            document.getElementById('padding-slider').addEventListener('input', async function() {
+                currentPadding = parseInt(this.value);
+                document.getElementById('padding-value').textContent = currentPadding + 'px';
+                if (hasUserInput()) await generateQRCode();
+            });
+
+            // Share button
+            document.getElementById('share-btn').addEventListener('click', async function() {
+                if (!qrCodeStyling || !hasUserInput()) {
+                    showToast('Please generate a QR code first');
+                    return;
+                }
+
+                try {
+                    const canvas = document.querySelector('#qr-code canvas');
+                    if (!canvas) {
+                        showToast('QR code not ready. Please wait and try again.');
+                        return;
+                    }
+
+                    canvas.toBlob(async (blob) => {
+                        if (!blob) {
+                            showToast('Failed to create image');
+                            return;
+                        }
+                        
+                        const encryptionSuffix = (encryptionEnabled && validatePasswords()) ? '_encrypted' : '';
+                        const file = new File([blob], `qrcode${encryptionSuffix}.png`, { type: 'image/png' });
+                        
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({
+                                    files: [file],
+                                    title: 'QR Code',
+                                    text: encryptionEnabled ? 'Check out this encrypted QR code!' : 'Check out this QR code!'
+                                });
+                                showToast(encryptionEnabled ? 'Encrypted QR Code shared!' : 'QR Code shared!');
+                                return;
+                            } catch (err) {
+                                if (err.name === 'AbortError') return;
+                            }
+                        }
+                        
+                        showToast('Sharing not available. Downloading image instead...');
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = `qrcode-shared${encryptionSuffix}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                    }, 'image/png', 0.95);
+                    
+                } catch (error) {
+                    showToast('Sharing not supported. Image downloaded instead.');
+                }
+            });
+
+            // Print button
+            document.getElementById('print-btn').addEventListener('click', function() {
+                if (!hasUserInput()) {
+                    showToast('Please generate a QR code first');
+                    return;
+                }
+                
+                const canvas = document.querySelector('#qr-code canvas');
+                if (canvas) {
+                    const encryptionNote = (encryptionEnabled && validatePasswords()) ? 
+                        '<p style="text-align: center; margin: 10px 0; color: #666; font-size: 12px;">This QR code is password protected</p>' : '';
+                    
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
+                        <html>
+                            <head><title>QR Code</title></head>
+                            <body style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+                                <img src="${canvas.toDataURL()}" style="max-width: 100%; max-height: 80%;">
+                                ${encryptionNote}
+                            </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                    showToast('Print dialog opened!');
+                }
+            });
+
+            // Generate QR button
+            document.getElementById('generate-qr').addEventListener('click', async function() {
+                if (hasUserInput()) {
+                    await generateQRCode();
+                    
+                    setTimeout(() => {
+                        const canvas = document.querySelector('#qr-code canvas');
+                        if (canvas) {
+                            const format = document.getElementById('format-select').value;
+                            const encryptionSuffix = (encryptionEnabled && validatePasswords()) ? '_encrypted' : '';
+                            
+                            if (format === 'svg') {
+                                if (qrCodeStyling) {
+                                    qrCodeStyling.download({ 
+                                        name: `qrcode${encryptionSuffix}`, 
+                                        extension: 'svg' 
+                                    });
+                                }
+                            } else {
+                                const dataUrl = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.95);
+                                const link = document.createElement('a');
+                                link.href = dataUrl;
+                                link.download = `qrcode${encryptionSuffix}.${format}`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                            
+                            showToast(encryptionEnabled ? 'Encrypted QR Code generated & downloaded!' : 'QR Code generated & downloaded!');
+                        } else {
+                            showToast('QR Code generated successfully!');
+                        }
+                    }, 500);
+                } else {
+                    showToast('Please enter some content first');
+                }
+            });
+
+            // Input listeners with validation
+            document.querySelectorAll('.form-field').forEach(field => {
+                field.addEventListener('input', function() {
+                    // Real-time validation
+                    let validationType = '';
+                    let fieldValue = this.value;
+                    
+                    if (this.id === 'url-input') {
+                        validationType = 'url';
+                    } else if (this.id === 'email-to' || this.id === 'contact-email') {
+                        validationType = 'email';
+                    } else if (this.id === 'phone-number' || this.id === 'contact-phone') {
+                        validationType = 'phone';
+                    } else if (this.id === 'geo-lat' || this.id === 'geo-lng') {
+                        validationType = 'geo-coords';
+                    }
+                    
+                    if (validationType && fieldValue.trim()) {
+                        const validation = validateInput(validationType, fieldValue);
+                        if (!validation.valid) {
+                            showValidationError(this, validation.message);
+                        } else {
+                            clearValidationError(this);
+                        }
+                    } else {
+                        clearValidationError(this);
+                    }
+                    
+                    debounceUpdate();
+                });
+            });
+
+            // Close modals on outside click
+            document.querySelectorAll('.overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.classList.remove('show');
+                    }
+                });
+            });
+
+            updateContentTypeBadge();
+        });
+    </script>
+</body>
+</html>
