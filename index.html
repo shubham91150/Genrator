@@ -4455,58 +4455,57 @@ Technical Data: ${encrypted}`;
 function detectSwipe(element, callback) {
   let touchstartX = 0;
   let touchendX = 0;
-  // Set a threshold for what constitutes a swipe
-  const swipeThreshold = 50; 
-  // You might also want to track vertical movement to prevent false positives
   let touchstartY = 0;
   let touchendY = 0;
-  let isVerticalScroll = false;
-  // A threshold for vertical movement
-  const verticalThreshold = 20;
+
+  // Set a threshold for what constitutes a horizontal swipe (e.g., 50 pixels)
+  const swipeThreshold = 50;
 
   element.addEventListener('touchstart', e => {
     touchstartX = e.changedTouches[0].screenX;
     touchstartY = e.changedTouches[0].screenY;
-    isVerticalScroll = false;
-  });
-
-  element.addEventListener('touchmove', e => {
-    // Check if the user is scrolling vertically
-    const touchY = e.changedTouches[0].screenY;
-    const deltaY = Math.abs(touchY - touchstartY);
-    const deltaX = Math.abs(e.changedTouches[0].screenX - touchstartX);
-
-    if (deltaY > deltaX && deltaY > verticalThreshold) {
-      isVerticalScroll = true;
-    } else {
-      isVerticalScroll = false;
-    }
   });
 
   element.addEventListener('touchend', e => {
-    if (isVerticalScroll) {
-      return; // If it was a vertical scroll, do nothing
-    }
-
     touchendX = e.changedTouches[0].screenX;
     touchendY = e.changedTouches[0].screenY;
     handleGesture();
   });
 
   function handleGesture() {
-    // Calculate the difference in horizontal position
     const diffX = touchstartX - touchendX;
-    
-    // Check if the horizontal movement is greater than the threshold
-    if (Math.abs(diffX) > swipeThreshold) {
+    const diffY = touchstartY - touchendY;
+
+    // Check if the horizontal movement is greater than the vertical movement
+    // and if the horizontal movement exceeds the swipe threshold.
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > swipeThreshold) {
       if (diffX > 0) {
+        // Swipe left
         callback('left');
       } else {
+        // Swipe right
         callback('right');
       }
     }
+    // If the movement is not a clear horizontal swipe, do nothing.
   }
 }
+
+// Get the body element to listen for swipes on the entire app
+const appBody = document.body;
+
+// Replace 'https://your-parent-app-url.com' with the exact origin of your parent app
+const parentAppURL = 'https://shubham91150.github.io/Parrent-/';
+
+// Detect swipes and send messages to the parent
+detectSwipe(appBody, (direction) => {
+  window.parent.postMessage({
+    type: 'gesture',
+    gesture: 'horizontalSwipe',
+    direction: direction
+  }, parentAppURL); // Now using the specific parent app URL for security
+  console.log(`Sent a ${direction} swipe message to the parent.`);
+});
 
 
     </script>
