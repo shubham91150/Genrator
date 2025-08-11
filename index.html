@@ -4450,6 +4450,46 @@ Technical Data: ${encrypted}`;
 
             updateContentTypeBadge();
         });
+
+    // Function to detect horizontal swipes
+function detectSwipe(element, callback) {
+  let touchstartX = 0;
+  let touchendX = 0;
+
+  element.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+  });
+
+  element.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleGesture();
+  });
+
+  function handleGesture() {
+    // Determine the swipe direction
+    if (touchendX < touchstartX) {
+      callback('left');
+    }
+    if (touchendX > touchstartX) {
+      callback('right');
+    }
+  }
+}
+
+// Get the body element to listen for swipes on the entire app
+const appBody = document.body;
+
+// Detect swipes and send messages to the parent
+detectSwipe(appBody, (direction) => {
+  window.parent.postMessage({
+    type: 'gesture',
+    gesture: 'horizontalSwipe',
+    direction: direction
+  }, 'https://shubham91150.github.io/Parrent-/'); // Replace '*' with the exact origin of the parent app for better security
+  console.log(`Sent a ${direction} swipe message to the parent.`);
+});
+
+
     </script>
 </body>
 </html>
